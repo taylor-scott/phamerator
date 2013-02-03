@@ -38,8 +38,10 @@ class Query:
     start
 
     """
-    def __init__(self, id=time.time(), phages=None,clusters=None,phams=None,aa=True,o=True):#time.time() resturns the current Unix timestamp.
-         """Initialize the Query class.
+
+    #time.time() resturns the current Unix timestamp.
+    def __init__(self, id=time.time(), phages=None,clusters=None,phams=None,aa=True,o=True):
+        """Initialize the Query class.
 
         Arguments:
         id (int) (optional) A unique id for the query. Default is a UNIX timestamp
