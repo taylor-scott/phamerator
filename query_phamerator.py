@@ -7,8 +7,8 @@ from Bio.Alphabet import IUPAC
 from Bio.SeqRecord import SeqRecord
 from Bio import SeqIO
 
-#Connect to the MySQL database. Change values if necessary.
-db = mysql.connect(host='localhost',user='root',passwd='phage',db='Mycobacteriophage_Draft')
+#Database options. Change values as necessary.
+db_options = {"host":"localhost","user":"root","passwd":"phage","db":"Mycobacteriophage_Draft"}
 
 #The main data retrieval class
 class Query:
@@ -43,8 +43,8 @@ class Query:
 		self.o=o
 		#self.gene_list (populated by self.run_search()) is a dictionary of the format {<PhageID or pham#>:[<list of GeneIDs>]}
 		self.gene_list={}
-		#User organization preference
-		self.organization=0
+		#Connect to the MySQL database. Change values if necessary.
+		self.db = mysql.connect(**db_options)
 		#Basic logging
 		self.log("Query started.")
 
@@ -161,7 +161,7 @@ class Query:
 	def make_fasta_files(self):
 		"""Write gene information to FASTA files"""
 		#Create a database instance
-		cursor = db.cursor()
+		cursor = self.db.cursor()
 		#Create directory "FASTA-files" if it does not already exist
 		if not os.path.exists("FASTA-files"): os.makedirs("FASTA-files")
 		#Convert the id to a string
@@ -251,7 +251,7 @@ class Query:
 		#Begin to build query. Will return a list of PhageIDs
 		query = "SELECT DISTINCT(PhageID),cluster,name FROM phage"
 		#Expand cluster list into list of subclusters
-		cursor = db.cursor()
+		cursor = self.db.cursor()
 		cluster_list = []
 		if len(self.clusters)>0:
 			query += " WHERE "
