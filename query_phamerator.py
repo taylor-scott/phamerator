@@ -25,6 +25,15 @@ class Query:
 
 	"""
 	def __init__(self, id, phages=None,clusters=None,phams=None,aa=True):
+		"""Initialize the Query class.
+		id (int) (required) A unique id for the query
+		phages (list) (optional) A list of phages to search for
+		clusters (list) (optional) A list of clusters to search for
+		phams (list) (optional) A list of phams to search for 
+		aa (Boolean) (optional) Boolean to search for amino acid sequences (True) or nucleotide sequences (False)
+		
+		"""
+
 		if phages is None:
 			phages = []
 
