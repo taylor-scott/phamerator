@@ -25,6 +25,17 @@ class Query:
 
 	"""
 	def __init__(self, id=time.time(), phages=None,clusters=None,phams=None,aa=True,o=True):	#time.time() resturns the current Unix timestamp.
+		 """Initialize the Query class.
+
+		Arguments:
+		id (int) (optional) A unique id for the query. Default is a UNIX timestamp
+		phages (list) (optional) A list of phages to search for
+		clusters (list) (optional) A list of clusters to search for
+		phams (list) (optional) A list of phams to search for 
+		aa (Boolean) (optional) Boolean to search for amino acid sequences (True) or nucleotide sequences (False)
+		o (Boolean) (optional) Boolean to organize FASTA files by phage (True) or pham (False)
+
+		"""
 		if phages is None:
 			phages = []
 
