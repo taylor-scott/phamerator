@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import os,time,sys
+import os,time,sys,argparse
 from datetime import datetime
 import MySQLdb as mysql
 from Bio.Seq import Seq
@@ -8,7 +8,7 @@ from Bio.SeqRecord import SeqRecord
 from Bio import SeqIO
 
 #Connect to the MySQL database. Change values if necessary.
-db = mysql.connect(host='localhost',user='root',passwd='phage',db='Mycobacteriophage_Database')
+db = mysql.connect(host='localhost',user='root',passwd='phage',db='Mycobacteriophage_Draft')
 
 #The main data retrieval class
 class Query:
@@ -24,16 +24,7 @@ class Query:
 	start
 
 	"""
-	def __init__(self, id, phages=None,clusters=None,phams=None,aa=True):
-		"""Initialize the Query class.
-		id (int) (required) A unique id for the query
-		phages (list) (optional) A list of phages to search for
-		clusters (list) (optional) A list of clusters to search for
-		phams (list) (optional) A list of phams to search for 
-		aa (Boolean) (optional) Boolean to search for amino acid sequences (True) or nucleotide sequences (False)
-		
-		"""
-
+	def __init__(self, id=time.time(), phages=None,clusters=None,phams=None,aa=True,o=True):	#time.time() resturns the current Unix timestamp.
 		if phages is None:
 			phages = []
 
@@ -46,8 +37,10 @@ class Query:
 		self.id = id
 		self.phages = phages
 		self.clusters = clusters
+		print self.clusters
 		self.phams = phams
 		self.aa = aa
+		self.o=o
 		#self.gene_list (populated by self.run_search()) is a dictionary of the format {<PhageID or pham#>:[<list of GeneIDs>]}
 		self.gene_list={}
 		#User organization preference
@@ -61,11 +54,13 @@ class Query:
 		if self.aa: print "Retrieving Amino Acids"
 		else: print "Retrieving Nucleotides"
 
+		if self.o: print "Organizing FASTA files by phage"
+		else: print "Organizing FASTA files by pham"
 	def main_menu(self):
 		"""Initialize and display the main menu"""
 		self.disp_query()
 		print "Query ID: %s"%self.id
-		print "Add search parameters\n[0] Phage Name(s)\n[1] Cluster(s)\n[2] Pham(s)\nRemove search parameters\n[3] Phage Name(s)\n[4] Cluster(s)\n[5] Pham(s)\nOther options\n[6] Toggle Amino Acids/Nucleotides\n[7] Search\n[8] Reset\n[9] Quit"
+		print "Add search parameters\n[0] Phage Name(s)\n[1] Cluster(s)\n[2] Pham(s)\nRemove search parameters\n[3] Phage Name(s)\n[4] Cluster(s)\n[5] Pham(s)\nOther options\n[6] Toggle Amino Acids/Nucleotides\n[7] Toggle phage/pham organization\n[8] Search\n[9] Reset\n[10] Quit"
 		#Process selected option
 		try:
 			self.menu_options(raw_input("Select option: "))
@@ -82,7 +77,7 @@ class Query:
 		#raw_input() returns a str value that must be converted to int
 		try:
 			param = int(param)
-			range(10).index(param)
+			range(11).index(param)
 		except ValueError as error:
 			print "Sorry, you have not chosen a valid menu option."		
 			self.log("ERROR: %s"%error)
@@ -119,11 +114,16 @@ class Query:
 		if param == 6:
 			self.aa = not self.aa
 			print "Successfully toggled"
-		#Option 7 calls the function to run the search
+		#Option 7 toggles the organization structure
 		if param == 7:
-			self.run_search()
-		#Option 8 resets the search parameters
+			self.o = not self.o
+			print "Successfully toggled"
+		#Option 8 calls the function to run the search
 		if param == 8:
+			self.run_search()
+			self.make_fasta_files()
+		#Option 9 resets the search parameters
+		if param == 9:
 			self.log("Query exited.")
 			print "Resetting search..."
 			try:
@@ -131,8 +131,8 @@ class Query:
 			except Exception as error:
 				print "Sorry, an unexpected error has occured. Please restart the program and try again. The error has been logged."
 				self.log("Error: %s"%error)
-		#option 9 exits the program
-		if param == 9:
+		#option 10 exits the program
+		if param == 10:
 			self.log("Query exited.")
 			quit()
 		#Display the main menu
@@ -158,7 +158,7 @@ class Query:
 		f.write(log)
 		f.close()
 
-	def make_fasta_files(self,o):
+	def make_fasta_files(self):
 		"""Write gene information to FASTA files"""
 		#Create a database instance
 		cursor = db.cursor()
@@ -174,7 +174,7 @@ class Query:
 		for name,gene_list in self.gene_list.items():
 			#Create a local list to store  gene information
 			recs=[]
-			if o==0:
+			if self.o==True:
 				#Retrieve cluster information if necessary
 				query = "SELECT Cluster FROM phage WHERE name='%s'"%name
 				self.log("Query executed: %s"%query)
@@ -214,7 +214,7 @@ class Query:
 					#Append the current <this_rec> to the list of <recs> for the current phage or pham (<p>)
 					recs.append(this_rec)
 			#Organized by phage
-			if o==0:
+			if self.o==True:
 				#Create folder structure. FASTA files will be stored in 'FASTA-files/<cluster>/(<subcluster>/)<name>.fasta'			
 				if cluster == 'Singleton':
 					if not os.path.exists(os.path.join("FASTA-files",id_str,'Singleton')):os.makedirs(os.path.join("FASTA-files",id_str,"Singleton"))
@@ -239,41 +239,36 @@ class Query:
 				print "Pham %s's FASTA file created in %s. %s genes logged\n"%(name,file_name,write_fasta)
 		#Begin a new query with the current search parameters
 		try:
-			start({"phages":self.phages,"clusters":self.clusters,"phams":self.phams,"aa":self.aa})
+			if len(sys.argv)==1:
+				start({"phages":self.phages,"clusters":self.clusters,"phams":self.phams,"aa":self.aa,"o":self.o})
 		except Exception as error:
 			print "Sorry an unexpected error has occured. Please restart the program and try again. The error has been logged."
 			self.log("ERROR: %s"%error)
 			raise
 	def run_search(self):
-		#Should the results be sorted by phage or by pham?
-		try:
-			o = int(raw_input("[0] Phage\n[1] Pham\nOrder FASTA files by: "))
-			range(2).index(0)
-		except ValueError as error:
-			print "Sorry, you have entered an invalid option. Please try again."
-			self.log("Error: %s"%error)
-			self.run_search()
-		except Exception as error:
-			print "Sorry an unexpected error has occured. Please restart the program and try again. The error has been logged."
-			self.log("ERROR: %s"%error)			
+		"""Search for genes matching the search parameters."""
+
 		#Begin to build query. Will return a list of PhageIDs
 		query = "SELECT DISTINCT(PhageID),cluster,name FROM phage"
 		#Expand cluster list into list of subclusters
 		cursor = db.cursor()
-		cluster_list = set()
+		cluster_list = []
 		if len(self.clusters)>0:
 			query += " WHERE "
 			for c in self.clusters:
 				if c != "Singleton":
 					#Search for all clusters that are similar to each user defined cluster (e.g. 'F' becomes ['F1','F2'])
 					c_query = "SELECT DISTINCT(Cluster) FROM phage WHERE Cluster LIKE '{}%'".format(c)
+					print c_query
 					self.log("Query executed: %s"%c_query)
 					cursor.execute(c_query)
 					results = cursor.fetchall()
 					#Iterate over the retrieved subclusters
 					for i in results:
 						#Add results to a new list of clusters and subclusters if they do not already exist
-						cluster_list.add(i)
+						cluster_list.append(i[0])
+			cluster_list = set(cluster_list)
+			print cluster_list
 			if len(cluster_list)>0:
 				#Accounts for quirk in tuple->str conversion: str(('x')) = 'x'. str(('x','y')) = "('x','y')"
 				cluster_list=tuple(cluster_list)
@@ -318,7 +313,7 @@ class Query:
 			#Iterate through the list of GeneIDs
 			for g in cursor.fetchall():
 				#If organizing by phage
-				if o==0:
+				if self.o is True:
 					#Store a list of genes as a dictionary value corresponding to the appropriate dictionary key. <r[0]> corresponds to the name of the phage
 					if r[2] in self.gene_list:
 						self.gene_list[r[2]].append(g[0])
@@ -335,19 +330,13 @@ class Query:
 		#Close database connection
 		cursor.close()
 		print "Query complete."
-		#Create the FASTA files
-		try:
-			self.make_fasta_files(o)
-		except Exception as error:
-			print "Sorry an unexpected error has occured. Please restart the program and try again. The error has been logged."
-			self.log("ERROR: %s"%error)
-			raise
+		return self.gene_list
 def start(options={}):
 	"""Initialize a query and display the main menu."""
 	try:
-		#time.time() resturns the current Unix timestamp.
-		q = Query(time.time(),**options)
+		q = Query(**options)
 		q.main_menu()
+
 	except Exception as error:
 		print "Sorry an unexpected error has occured. Please restart the program and try again. The error has been logged."
 		self.log("ERROR: %s"%error)
@@ -355,4 +344,21 @@ def start(options={}):
 
 #Start the program
 if __name__ == '__main__':
-	start()
+	p = argparse.ArgumentParser(description="Query a phamerator database.\n\nArguments are parsed into an SQL query of the form:\n\tSELECT gene FROM gene_table WHERE phage_name IN (list_of_phages) OR cluster IN (list_of clusters) AND pham IN (list_of_phams)", formatter_class=argparse.RawTextHelpFormatter)
+
+	p.add_argument("id",nargs="?",type=int,help="A unique int ID for your query. Default is a UNIX time stamp",default=time.time())
+	p.add_argument("-p","--phages",nargs="+",help="A list of phages, separated by a space",metavar="phage")
+	p.add_argument("-c","--clusters",nargs="+",help="A list of clusters, separated by a space",metavar="cluster")
+	p.add_argument("-P","--phams",nargs="+",help="A list of phams, separated by a space",metavar="pham")
+	p.add_argument("-n","--nucleotide",action='store_false',dest="aa",help="Retrieve nucleotide sequences instead of amino acid sequences")
+	p.add_argument("-o","--organize",action="store_false",help="Organize results by pham",dest="o")
+	if len(sys.argv)>1:
+
+		opts = vars(p.parse_args())
+
+		options = {k:opts[k] for k in opts if opts[k] is not None}
+		q = Query(**options)
+		q.run_search()
+		q.make_fasta_files()
+	else:
+		start()
