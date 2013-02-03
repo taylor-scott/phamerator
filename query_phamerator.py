@@ -64,7 +64,6 @@ class Query:
         self.id = id
         self.phages = phages
         self.clusters = clusters
-        print self.clusters
         self.phams = phams
         self.aa = aa
         self.o=o
@@ -74,6 +73,9 @@ class Query:
         self.db = mysql.connect(**db_options)
         #Basic logging
         self.log("Query started.")
+
+    def __str__(self):
+        return "Searching for {} sequences of genes belonging to phages {} or clusters {} and in phams {}, organized by {}".format(("nucleotide","amino acid")[self.aa], self.phages, self.clusters, self.phams, ("pham","phage")[self.o])
 
     def disp_query(self):
         """Display the current search parameters"""
@@ -149,6 +151,14 @@ class Query:
         if param == 8:
             self.run_search()
             self.make_fasta_files()
+            #Begin a new query with the current search parameters
+            try:
+                if len(sys.argv)==1:
+                    start({"phages":self.phages,"clusters":self.clusters,"phams":self.phams,"aa":self.aa,"o":self.o})
+            except Exception as error:
+                print "Sorry an unexpected error has occured. Please restart the program and try again. The error has been logged."
+                self.log("ERROR: %s"%error)
+                raise
         #Option 9 resets the search parameters
         if param == 9:
             self.log("Query exited.")
@@ -264,17 +274,11 @@ class Query:
                 file_name = os.path.join("FASTA-files",id_str,"%s.fasta"%name)
                 write_fasta = SeqIO.write(recs,file_name,"fasta")
                 print "Pham %s's FASTA file created in %s. %s genes logged\n"%(name,file_name,write_fasta)
-        #Begin a new query with the current search parameters
-        try:
-            if len(sys.argv)==1:
-                start({"phages":self.phages,"clusters":self.clusters,"phams":self.phams,"aa":self.aa,"o":self.o})
-        except Exception as error:
-            print "Sorry an unexpected error has occured. Please restart the program and try again. The error has been logged."
-            self.log("ERROR: %s"%error)
-            raise
+
     def run_search(self):
         """Search for genes matching the search parameters."""
 
+        self.gene_list=[]
         #Begin to build query. Will return a list of PhageIDs
         query = "SELECT DISTINCT(PhageID),cluster,name FROM phage"
         #Expand cluster list into list of subclusters
