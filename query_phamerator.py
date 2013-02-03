@@ -38,7 +38,7 @@ class Query:
     start
 
     """
-    def __init__(self, id=time.time(), phages=None,clusters=None,phams=None,aa=True,o=True):    #time.time() resturns the current Unix timestamp.
+    def __init__(self, id=time.time(), phages=None,clusters=None,phams=None,aa=True,o=True):#time.time() resturns the current Unix timestamp.
          """Initialize the Query class.
 
         Arguments:
