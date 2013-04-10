@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 #Copyright (C) <year> <copyright holders>
 
 #Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -12,7 +14,6 @@
 
 #THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE
 
-#!/usr/bin/env python
 import os,time,sys,argparse
 from datetime import datetime
 import MySQLdb as mysql
@@ -270,7 +271,7 @@ class Query:
 
 class gtkMain:
 	def __init__(self):
-		glade = "test2.glade"
+		glade = "ui.glade"
 		self.builder = gtk.Builder()
 		self.builder.add_from_file(glade)
 		self.window = self.builder.get_object("window1")
