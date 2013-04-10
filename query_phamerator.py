@@ -279,7 +279,7 @@ class gtkMain:
 		#for phage in phage_list:
 		#	phageList.append(phage)
 
-		dic = {"on_window1_destroy":gtk.main_quit,"on_cancelButton_clicked":gtk.main_quit,"on_searchButton_clicked":self.search}
+		dic = {"on_window1_destroy":gtk.main_quit,"on_cancelButton_clicked":gtk.main_quit,"on_searchButton_clicked":self.search,"on_resetButton_clicked":self.reset}
 		self.builder.connect_signals(dic)
 		self.window.show_all()
 
@@ -323,8 +323,10 @@ class gtkMain:
 		dialog.vbox.pack_start(scrolledWindow)
 		dialog.show_all()
 
-		
-
+	def reset(self,window):
+		self.builder.get_object("phageEntry").set_text("")
+		self.builder.get_object("clusterEntry").set_text("")
+		self.builder.get_object("phamEntry").set_text("")
 
 if __name__ == "__main__":
 	mainWindow = gtkMain()
