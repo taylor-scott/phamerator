@@ -6,4 +6,4 @@ Phamerator is a tool created and maintained by Dr. Steve Cresawn of James Madiso
 
 2. References
 ----------
-Cresawn, Steven G., Matt Bogel, Nathan Day, Deborah Jacobs-Sera, Roger W. Hendrix, and Graham F. Hatfull. 2011. “Phamerator: A Bioinformatic Tool for Comparative Bacteriophage Genomics.” BMC Bioinformatics 12 (1) (October 12): 395. doi:10.1186/1471-2105-12-395.
+1. Cresawn, Steven G., Matt Bogel, Nathan Day, Deborah Jacobs-Sera, Roger W. Hendrix, and Graham F. Hatfull. 2011. “Phamerator: A Bioinformatic Tool for Comparative Bacteriophage Genomics.” BMC Bioinformatics 12 (1) (October 12): 395. doi:10.1186/1471-2105-12-395.
