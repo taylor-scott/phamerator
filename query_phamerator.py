@@ -25,6 +25,7 @@ import pygtk
 import gtk
 pygtk.require("2.0")
 
+#Edit this to match MySQL server configuration settings
 db = mysql.connect(host='localhost',user='root',passwd='phage',db='Mycobacteriophage_Draft')
 
 class Query:
@@ -59,7 +60,7 @@ class Query:
 		self.phams = phams
 		self.aa = aa
 		self.o=o
-		#self.gene_list (populated by self.get_gene_list()) is a dictionary of the format {<PhageID or pham#>:[<list of GeneIDs>]}
+		#self.gene_list (populated by self.get_gene_list()) is a dictionary of the format {<PhageID or pham #>:[<list of GeneIDs>]}
 		self.gene_list={}
 		#User organization preference
 		self.organization=0
@@ -170,17 +171,7 @@ class Query:
 				file_name = "%s.fasta"%name
 				write_fasta = SeqIO.write(recs,os.path.join(self.fasta_directory,file_name),"fasta")
 				self.written_fastas += "Pham %s's FASTA file created in %s. %s genes logged\n"%(name,file_name,write_fasta)
-	def get_gene_list(self):
-		#Should the results be sorted by phage or by pham?
-		#try:
-		#	self.o = not bool(int(raw_input("[0] Phage\n[1] Pham\nOrder FASTA files by: ")))
-		#except ValueError as error:
-		#	print "Sorry, you have entered an invalid option. Please try again."
-		#	self.log("Error: %s"%error)
-		#	self.get_gene_list()
-		#except Exception as error:
-		#	print "Sorry an unexpected error has occured. Please restart the program and try again. The error has been logged."
-		#	self.log("ERROR: %s"%error)			
+	def get_gene_list(self):	
 		#Begin to build query. Will return a list of PhageIDs
 		query = "SELECT DISTINCT(PhageID),cluster,name FROM phage"
 		#Expand cluster list into list of subclusters
@@ -261,23 +252,13 @@ class Query:
 		#Close database connection
 		cursor.close()
 		return True
-		#Create the FASTA files
-		#try:
-		#	self.make_fasta_files()
-		#except Exception as error:
-		#	print "Sorry an unexpected error has occured. Please restart the program and try again. The error has been logged."
-		#	self.log("ERROR: %s"%error)
-		#	raise
-
+		
 class gtkMain:
 	def __init__(self):
 		glade = "ui.glade"
 		self.builder = gtk.Builder()
 		self.builder.add_from_file(glade)
 		self.window = self.builder.get_object("window1")
-		#phageList = builder.get_object("allPhageList")
-		#for phage in phage_list:
-		#	phageList.append(phage)
 
 		dic = {"on_window1_destroy":gtk.main_quit,"on_cancelButton_clicked":gtk.main_quit,"on_searchButton_clicked":self.search,"on_resetButton_clicked":self.reset}
 		self.builder.connect_signals(dic)
