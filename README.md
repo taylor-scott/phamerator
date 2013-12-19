@@ -11,6 +11,7 @@ query-phamerator is written in Python 2.7 and depends on the following packages:
 - BioPython
 - pygtk
 - gtk
+
 All other packages used are found in the standard library.
 
 3. References
