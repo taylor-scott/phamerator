@@ -44,7 +44,7 @@ class Query:
     get_gene_list
     start
     """
-    def __init__(self, q_id=None, phages=None,clusters=None,phams=None,aa=0,o=True):
+    def __init__(self, q_id=None, phages=None, clusters=None, phams=None, aa=0, o=True):
         if q_id is None:
             q_id = time.time()
 
@@ -62,11 +62,10 @@ class Query:
         self.clusters = clusters
         self.phams = phams
         self.aa = aa
+        #User organization preference
         self.o=o
         #self.gene_list (populated by self.get_gene_list()) is a dictionary of the format {<PhageID or pham #>:[<list of GeneIDs>]}
         self.gene_list={}
-        #User organization preference
-        self.organization=0
         self.fasta_directory = os.path.join("FASTA-files",str(self.id))
         self.written_fastas="Root directory: %s\n"%self.fasta_directory
         #Basic logging
