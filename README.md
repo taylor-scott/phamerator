@@ -7,10 +7,12 @@ Phamerator is a tool created and maintained by Dr. Steve Cresawn of James Madiso
 2. Design
 ----------
 query-phamerator is written in Python 2.7 and depends on the following packages:
+
 -MySQLdb
 -BioPython
 -pygtk
 -gtk
+
 All other packages used are found in the standard library.
 
 3. References
